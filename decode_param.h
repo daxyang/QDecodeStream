@@ -1,0 +1,160 @@
+#ifndef DECODE_PARAM
+#define DECODE_PARAM
+
+#define A5S66   (0)
+#define HI3516A (1)
+#define H264    (0)
+#define H265    (1)
+#define JPEG    (2)
+
+#define MAX_AUTO_THREADS 9
+
+/*
+ *  1) /include/libavutil/common.h:154:47: error: 'UINT64_C' was not declared in this scope
+ * make: *** [out/Release/obj.target/geni/ffmpeg_stubs.o] Error 1
+ * 出错对应：
+*/
+#ifndef UINT64_C
+#define UINT64_C(value) __CONCAT(value, ULL)
+#endif
+extern "C"
+{
+#ifdef __cplusplus
+ #define __STDC_CONSTANT_MACROS
+ #ifdef _STDINT_H
+  #undef _STDINT_H
+ #endif
+ # include <stdint.h>
+#endif
+}
+//图像处理头文件
+//如果采用gcc编译器，则放在.c文件中，如果采用g++编译器，可以放在.h文件中
+//#include <opencv/cv.h>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv/cxcore.h>
+//#include <opencv/highgui.h>
+#include <stdio.h>
+// namespace cv;
+using namespace std;
+//#ifdef _WIN32
+/*
+ * 对策下面出错
+ *e:\ffmpeg-win32-dev\include\libavutil\common.h:30: error:
+ *#error missing -D__STDC_CONSTANT_MACROS / #define __STDC_CONSTANT_MACROS
+ *#error missing -D__STDC_CONSTANT_MACROS / #define __STDC_CONSTANT_MACROS
+ *^
+ */
+/*
+ * 注意位置，否则会出错
+*/
+extern "C"
+{
+#ifdef __cplusplus
+#define __STDC_CONSTANT_MACROS
+#endif
+}
+
+//#endif
+
+extern "C"
+{
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libavutil/avutil.h"
+#include "libavutil/mem.h"
+#include "libavutil/fifo.h"
+#include "libavutil/opt.h"    // av_opt_set()
+#include "libswscale/swscale.h"
+}
+
+/*
+ * Ambarella A5s66的PPS PSP 头信息
+ */
+const char CODECCTX_A5S66_H264[]={
+    0x00,0x00,0x00,0x01, //PPS
+    0x67,0x4D,0x00,0x1F,
+    0x9A,0x66,0x02,0x80,
+    0x2D,0xFF,0x80,0xB5,
+    0x01,0x01,0x01,0x40,
+    0x00,0x00,0xFA,0x00,
+    0x00,0x30,0xD4,0x3A,
+    0x18,0x00,0x7F,0x1C,
+    0x00,0x07,0xF1,0xBA,
+    0xEF,0x2E,0x34,0x30,
+    0x00,0xFE,0x38,0x00,
+    0x0F,0xE3,0x75,0xDE,
+    0x5C,0x28,
+    0x00,0x00,0x00,0x01, //PSP
+    0x68,0xEE,0x3C,0x80
+};
+/*
+ *  海思 3516A H.264解码的 PPS PSP头
+ */
+
+const char CODECCTX_3516A_H264[]={
+    0x00,0x00,0x00,0x01, //PPS
+    0x67,0x4D,0x00,0x2A,
+    0x95,0xA8,0x1E,0x00,
+    0x89,0xF9,0x66,0xE0,
+    0x20,0x20,0x20,0x40,
+    0x00,0x00,0x00,0x01,  //PSP
+    0x68,0xEE,0x3C,0x80
+};
+/*
+ ＊ 海思 3516A H.265的PPS PSP头
+ */
+const char CODECCTX_3516A_H265[]={
+    0x00,0x00,0x00,0x01,  //PPS
+    0x40,0x01,0x0C,0x01,
+    0xFF,0xFF,0x01,0x60,
+    0x00,0x00,0x03,0x00,
+    0xB0,0x00,0x00,0x03,
+    0x00,0x00,0x03,0x00,
+    0x7B,0xAA,0x02,0x40,
+    0x00,0x00,0x00,0x01,
+    0x42,0x01,0x01,0x01,
+    0x60,0x00,0x00,0x03,
+    0x00,0xB0,0x00,0x00,
+    0x03,0x00,0x00,0x03,
+    0x00,0x7B,0xA0,0x03,
+    0xC0,0x80,0x10,0xE5,
+    0x8D,0xAA,0x92,0x4C,
+    0xBE,0x40,
+    0x00,0x00,0x00,0x01,  //PSP
+    0x44,0x01,0xC0,0xF2,
+    0xF0,0x3C,0x90,0x00,
+    0x00,0x00,0x01,0x4E,
+    0x01,0xE5,0x04,0x1D,
+    0x0E,0x00,0x00,0x80
+
+};
+
+
+//解码数据结构体
+typedef struct{
+    AVCodec *codec;
+    AVCodecContext *codecCtx;
+    AVCodecParserContext *parser;
+    AVFrame *frame;
+    struct SwsContext *img_convert_ctx;
+    AVPacket avp;
+ //   Mat Mat_Rio;  //感兴趣区域
+}decode_h264_t;
+
+
+typedef struct
+{
+ //   uint8_t  **buffer;  //图像缓冲区首地址的指针
+    int width;//图像的宽度
+    int height; //图像的高度
+}image_param_t;
+struct view_param_t
+{
+    image_param_t image;
+    void (*callback)(uint8_t *oneframebuffer);  //回调函数=> 解码完成时，调用该函数。可能通过回调函数进行数据处理(屏幕刷新)
+};
+
+
+#endif // DECODE_PARAM
+
