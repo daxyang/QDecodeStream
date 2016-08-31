@@ -1,7 +1,7 @@
 #ifndef QDECODESTREAM_H
 #define QDECODESTREAM_H
 #include "pthread.h"
-#include "qdecodestream_global.h"
+//#include "qdecodestream_global.h"
 #include "decode_param.h"
 #include "unistd.h"
 #include "getrawdata.h"
@@ -9,7 +9,8 @@
 typedef unsigned int (u32);
 
 
-class QDECODESTREAMSHARED_EXPORT QDecodeStream
+//class QDECODESTREAMSHARED_EXPORT QDecodeStream
+class QDecodeStream
 {
 
 public:

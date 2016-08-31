@@ -274,6 +274,7 @@ int QDecodeStream::decoder_pps_psp(int platform,int encode)
         for(int i = 0;i < len;i += 1)
         {
             nual_head = (unsigned int *)(buffer + i);
+            //printf("nual head:%x \n",*(nual_head));
             if((*nual_head) == 0x01000000)
             {
                 printf("%02x \n",(unsigned char)(*(buffer+i+4)));
@@ -368,7 +369,7 @@ void QDecodeStream::ipcam_decode_init(int platform,int encode)
                decode_h264.codecCtx->thread_count,MAX_AUTO_THREADS);
     }
 
-   
+
     //根据编码，决定PPS PSP的头格式数据
     pps_code_size = decoder_pps_psp(platform,encode);
     if(pps_code_size == 0)

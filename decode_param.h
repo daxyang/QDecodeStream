@@ -48,15 +48,22 @@ using namespace std;
 /*
  * 注意位置，否则会出错
 */
+/*  <2016-8-23>
 extern "C"
 {
 #ifdef __cplusplus
 #define __STDC_CONSTANT_MACROS
 #endif
 }
-
+*/
 //#endif
-
+extern "C"
+{
+#include "libavcodec/avcodec.h"
+#include "libswscale/swscale.h"
+#include "libavformat/avformat.h"
+}
+/* <2016-8-23>
 extern "C"
 {
 #include "libavcodec/avcodec.h"
@@ -67,7 +74,7 @@ extern "C"
 #include "libavutil/opt.h"    // av_opt_set()
 #include "libswscale/swscale.h"
 }
-
+*/
 /*
  * Ambarella A5s66的PPS PSP 头信息
  */
@@ -157,4 +164,3 @@ struct view_param_t
 
 
 #endif // DECODE_PARAM
-
