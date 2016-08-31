@@ -1,8 +1,8 @@
 #ifndef GETRAWDATA_H
 #define GETRAWDATA_H
 
-#include "qslidingwindow.h"
-
+//#include "qslidingwindow.h"
+#include "QSlidingWindow.h"
 class GetRAWData
 {
 public:
